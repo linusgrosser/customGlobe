@@ -7,10 +7,10 @@ import { Country } from './classes.js';
 //Creating Variables
 let scene, camera, renderer, controls, pointlight;
 
+//Array of all CountryObjects
+let countries = [];
+
 //Function that fires at the start of app
-
-
-
 async function init() {
     //Create Scene
     scene = new THREE.Scene();
@@ -37,14 +37,11 @@ async function init() {
     //Gives the Objects a feel of weight, makes dragging smooth
     controls.enableDamping = true;
 
-    //Create Light, setting Position and adding to Scene
+    //Create Light, setting Position and adding to Scene (currently not necessary)
     pointlight = new THREE.PointLight(0xffffff, 1);
     pointlight.position.set(200, 200, 200);
     scene.add(pointlight);
 
-    let countries = [];
-
-    
 
     //Get Json Country Data and fills the countries array with CountryObjects
     async function loadCountries() {
@@ -58,65 +55,118 @@ async function init() {
         for (let i = 0; i < countryLen; i++) {
             //Save name, code and geometry
             let name = data.features[i].properties.name;
-            let code = data.features[i].properties.postal;
+            let code = (data.features[i].properties.iso_a2).toLowerCase();
             let geometry = data.features[i].geometry;
+
             //Create Country Object
             let country = new Country(name, code, geometry);
             //Push Object to Array
             countries.push(country);
         }
-
-        console.log(countries);
-
-        return data;
+        //Sort Countries Alphabetically
+        countries.sort((a, b) => a.name > b.name ? 1 : -1);
     }
 
-    //Paint all Countries
-    function paintCountries(json) {
-        //The amount of countries in the JSON
-        let countryLen = json.features.length;
-        let countries = json.features;
-        //loop through each Country
-        for (let i = 0; i < countryLen; i++) {
+    //Get ListView Element from Html to append the CountryPanels later on
+    let listView = document.getElementById('list-view');
+    //Creates the according Country Panel for Each Country and appends it to ListView
+    function addCountriesToListView() {
+        //Create a DocumentFragment to temporarily store the panels before ading them to ListView
+        let docFrag = document.createDocumentFragment();
+        //Loop through The Country Array
+        for (let i = 0; i < countries.length; i++) {
+            //Clone the Country Template
+            let tempNode = document.querySelector("div[data-type='template']").cloneNode(true); //true for deep clone
+            //Make the Div visible again
+            tempNode.style.display = "flex";
+            //Change the Display name
+            tempNode.querySelector("p.country-text").textContent = countries[i].name;
+            //Change Image source
+            tempNode.querySelector("img").src = 'https://flagcdn.com/28x21/' + countries[i].code + '.png';
+            //Get checkbox instance
+            let checkbox = tempNode.querySelector("input[type='checkbox']");
+            //Change value and id of checkbox to the according country
+            checkbox.value = countries[i].code;
+            checkbox.id = 'check-' + countries[i].code;
+            //Add an event Listener on the Checkbox. When Checkbox gets checked, paint the Country again
+            checkbox.addEventListener('change', (event) => {
+                paintCountry(countries[i], event.currentTarget.checked);
+            });
+            //Append the TempNode to the documentFragment
+            docFrag.appendChild(tempNode);
+        }
+        //Append documentFragment to ListView
+        listView.appendChild(docFrag);
+    }
 
-            //Storing variables
-            let isMulti = countries[i].geometry.type === 'MultiPolygon';
-            let coords = countries[i].geometry.coordinates
-            let polygonCount = coords.length;
+    //Get the Divs in ListView
+    let countryPanels = listView.children;
+    //Get the inputField of CountrySearchPanel
+    let countrySearch = document.getElementById('country-search');
+    //When input changes in inputField
+    countrySearch.addEventListener('input', (event) => {
+        //Store Input
+        let input = countrySearch.value.toLowerCase();
+        //Loop through each CountryPanel
+        for (let country of countryPanels) {
+            //Store current Country Panel Name
+            let name = (c.getElementsByClassName('country-text')[0].outerText).toLowerCase();
+            //if the input is a substring of the country name, make div visible. If not, make div invisble
+            country.style.display = name.includes(input) ? 'flex' : 'none';
+        }
+    });
 
-            //loop through polygons
-            for (let p = 0; p < polygonCount; p++) {
-                //Check if Country is MultiPolygon
-                if (isMulti) {
-                    for (let u = 0; u < coords[p].length; u++) {
-                        drawPolygonByArray(coords[p][u]);
-                    }
-                } else {
-                    for (let u = 0; u < coords.length; u++) {
-                        drawPolygonByArray(coords[u]);
-                    }
+    //Paint one Country
+    function paintCountry(country, selected = false) {
+        //Storing variables
+        let isMulti = country.geometry.type === 'MultiPolygon';
+        //Get coordinates
+        let coords = country.geometry.coordinates;
+        //Get the amount of Polygons that the Country has
+        let polygonCount = coords.length;
+        //loop through polygons
+        for (let p = 0; p < polygonCount; p++) {
+            //NOTE: MultiPolygon and Polygon Countries have to be treated differently
+            //Check if Country is MultiPolygon
+            if (isMulti) {
+                //loop through each polygons Coordinate and draw a Polygon
+                for (let u = 0; u < coords[p].length; u++) {
+                    drawPolygonByArray(coords[p][u]);
+                }
+            } else {
+                //loop through each Coordinate and draw a Polygon
+                for (let u = 0; u < coords.length; u++) {
+                    drawPolygonByArray(coords[u]);
                 }
             }
-
-
         };
 
         //Draw The Countries Polygons
         function drawPolygonByArray(arr) {
-
+            //Begin Path and move to first Coordinate in array
             ctx.beginPath();
             let xy = getPXfromLatLng(arr[0][0], arr[0][1]);
             ctx.moveTo(xy.x, xy.y);
+            //Loop through each Coordinate in Array and Draw Lines
             for (let i = 0; i < arr.length; i++) {
                 let xy = getPXfromLatLng(arr[i][0], arr[i][1]);
                 ctx.lineTo(xy.x, xy.y)
             }
+            //Close Path, Fill with according color, and create Stroke
             ctx.closePath();
-            ctx.fillStyle = 'silver';
+            ctx.fillStyle = selected ? 'black' : 'silver';
             ctx.fill();
             ctx.stroke();
+
+            //If Country is selected, update Canvas
+            if (selected) {
+                sphereMaterial.map = canvas;
+                texture.needsUpdate = true;
+            }
+
         }
 
+        //Converts latitude and longitute to x and y.
         function getPXfromLatLng(lat, lon) {
             let posX = ((lat + 180.0) * (canvasW / 360.0));
             let posY = (((lon * -1.0) + 90.0) * (canvasH / 180.0));
@@ -126,39 +176,44 @@ async function init() {
 
     }
 
+    //Create a Canvas
     const canvas = document.createElement('canvas');
+    //Store Resoultion of Canvas
     let canvasW = 10800;
     let canvasH = 5400;
-
+    //Set resolution of Canvas
     canvas.width = canvasW;
     canvas.height = canvasH;
-
+    //Get Context of Canvas and set Background
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvasW, canvasH);
+    //Load All Countries
+    await loadCountries();
+    //Paint All Countries
+    for (let i = 0; i < countries.length; i++) {
+        paintCountry(countries[i]);
+    }
+    //Add All Countries to ListView
+    addCountriesToListView();
 
-    let json = await loadCountries();
-    paintCountries(json);
-
-    let tex = new THREE.CanvasTexture(canvas);
-    tex.needsUpdate = true;
-
+    //Set texture to Canvas
+    let texture = new THREE.CanvasTexture(canvas);
+    //Update Texture
+    texture.needsUpdate = true;
 
     //Configurations for the Material
     const sphereMaterial = {
-        map: tex
+        map: texture,
+        //wireframe: true
     };
 
     //Creating Sphere Object
     let sphereGeo = new THREE.SphereGeometry(80, 64, 64);
     let sphereMat = new THREE.MeshBasicMaterial(sphereMaterial);
     let sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
+    //Adding Sphere to Scene
     scene.add(sphereMesh);
-
-    function createUI() {
-        
-    }
-
 
     //Call animation Function
     animate();
