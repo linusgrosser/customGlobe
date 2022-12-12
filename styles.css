@@ -4,68 +4,161 @@ body {
   width: 100vw;
   height: 100vh;
   margin: 0;
-  background: radial-gradient(#d1d1d1, #ffffff);
+  background: radial-gradient(#c4c4c4, #ffffff);
   overflow: hidden;
 }
 
 .panel {
-  font-family: 'Poppins', sans-serif;
   position: absolute;
   transform: translate(-50%, 50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99;
+  top: 0;
+  margin: auto 0;
+  bottom: 250px;
+  height: 250px;
+  width: 195px;
+}
+
+#left-panel {
+  left: 25%;
+  visibility: visible;
+  opacity: 1;
+  transition: 200ms ease;
+}
+
+.panel-icon {
+  height: 50px;
+  width: 50px;
+  position: fixed;
+}
+
+.panel:hover .panel-icon {
+  animation: content-out 200ms ease 0ms 1 normal forwards;
+}
+
+.panel .panel-icon {
+  animation: content-in 200ms ease 0ms 1 normal backwards;
+}
+
+
+
+#white-flag {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  margin: auto auto;
+  height: 30px;
+  width: 30px;
+}
+
+
+.panel .country-panel {
+  animation: panel-out 200ms ease 100ms 1 normal backwards;
+
+}
+
+.panel:hover .country-panel {
+  animation: panel-in 200ms ease 0ms 1 normal forwards;
+}
+
+@keyframes panel-in {
+  from {
+    height: 50px;
+    width: 50px;
+    padding: 0px;
+  }
+
+  to {
+    height: 250px;
+    width: 195px;
+    padding: 15px;
+
+  }
+}
+
+@keyframes panel-out {
+  from {
+    height: 250px;
+    width: 195px;
+    padding: 15px;
+
+  }
+
+  to {
+    height: 50px;
+    width: 50px;
+    padding: 0px;
+
+  }
+}
+
+.panel:hover .content-holder {
+  animation: content-in 200ms ease 100ms 1 normal backwards;
+
+}
+
+.panel .content-holder {
+  animation: content-out 200ms ease 0ms 1 normal forwards;
+}
+
+@keyframes content-in {
+  from {
+    display: none;
+    opacity: 0;
+    z-index: 100;
+  }
+
+  to {
+    z-index: -1;
+    display: block;
+    opacity: 1;
+  }
+}
+
+@keyframes content-out {
+  from {
+    z-index: -1;
+    visibility: visible;
+    opacity: 1;
+  }
+
+  to {
+    z-index: 100;
+
+    visibility: hidden;
+    opacity: 0;
+  }
+}
+
+.country-panel {
+  font-family: 'Poppins', sans-serif;
   display: block;
   box-sizing: border-box;
-  padding: 15px;
   z-index: 99;
-  left: 25%;
-  top: 0;
-  bottom: 50px;
-  margin: auto 0;
   height: 50px;
   width: 50px;
   background-color: white;
-  border-radius: 15px;
-  transition: .2s all ease-in-out;
+  border-radius: 10px;
+  transition: 200ms ease-in-out;
 }
 
-.panel:hover {
-  bottom: 230px;
-  height: 230px;
-  width: 180px;
-}
-
-
-.content-holder {
-  height: 50px;
-  position: relative;
-  overflow: hidden;
-  opacity: 0;
-}
-
-.content-holder:hover {
-  position:static;
-  overflow:visible;
-  height: calc(auto + 150px);
-
-  transition: .2s ease-in-out;
-  transition-delay: 200ms;
-  display: block;
-  opacity: 1;
-
-}
 
 .innerPanel {
   position: absolute;
   top: 50%;
   left: 50%;
-
   height: calc(100% - 60px);
   width: calc(100% - 60px);
   padding: 15px;
-  background-color: antiquewhite;
 }
 
 h2 {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   line-height: 1;
   margin: 0;
@@ -74,11 +167,11 @@ h2 {
 
 .search-panel {
   width: 100%;
-  height: 20px;
+  height: 22px;
   -webkit-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.15);
   box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.15);
   margin-top: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   border-radius: 5px;
 }
 
@@ -97,9 +190,8 @@ h2 {
 }
 
 #list-view {
-  height: 135px;
+  height: 150px;
   width: 100%;
-  background-color: none;
   overflow-y: scroll;
 }
 
@@ -112,10 +204,9 @@ h2 {
 }
 
 .flag {
-  padding-right: 10px;
-  padding-left: 2px;
-  height: 10px;
-
+  margin-right: 10px;
+  margin-left: 2px;
+  height: 12px;
 }
 
 .left-container {
@@ -124,11 +215,12 @@ h2 {
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 p {
   line-height: 1;
-  font-size: 10px;
+  font-size: 12.5px;
   font-weight: 400;
   text-overflow: ellipsis;
   padding: 0;
@@ -139,10 +231,11 @@ p {
 }
 
 .country-check {
+  border: #4686E7 2px solid;
   accent-color: #4686E7;
-  padding-right: 5px;
+  margin-right: 10px;
+  color: #4686E7;
 }
-
 
 
 /* width */

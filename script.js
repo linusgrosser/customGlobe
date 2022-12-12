@@ -10,6 +10,8 @@ let scene, camera, renderer, controls, pointlight;
 //Array of all CountryObjects
 let countries = [];
 
+let leftPanel;
+
 //Function that fires at the start of app
 async function init() {
     //Create Scene
@@ -26,21 +28,25 @@ async function init() {
     renderer.toneMappingExposure = 1.25;
 
     //Create Camera with FOV, Aspect, and Clippings
-    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+    //camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+    camera = new THREE.OrthographicCamera(window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000);
     //Set pos of Camera
-    camera.position.set(0, 0, 500);
+    camera.position.z = 500;
 
     //Create Controls for Orbit
     controls = new OrbitControls(camera, renderer.domElement);
     controls.autoRotate = true;
     controls.autoRotateSpeed = 0.5;
+    controls.zoomSpeed = 3;
+    controls.minZoom = 1;
+    controls.maxZoom = 15;
     //Gives the Objects a feel of weight, makes dragging smooth
     controls.enableDamping = true;
 
     //Create Light, setting Position and adding to Scene (currently not necessary)
-    pointlight = new THREE.PointLight(0xffffff, 1);
-    pointlight.position.set(200, 200, 200);
-    scene.add(pointlight);
+    //pointlight = new THREE.PointLight(0xffffff, 1);
+    //pointlight.position.set(200, 200, 200);
+    //scene.add(pointlight);
 
 
     //Get Json Country Data and fills the countries array with CountryObjects
@@ -57,6 +63,7 @@ async function init() {
             let name = data.features[i].properties.name;
             let code = (data.features[i].properties.iso_a2).toLowerCase();
             let geometry = data.features[i].geometry;
+            
 
             //Create Country Object
             let country = new Country(name, code, geometry);
@@ -84,6 +91,7 @@ async function init() {
             //Change Image source
             tempNode.querySelector("img").src = 'https://flagcdn.com/28x21/' + countries[i].code + '.png';
             //Get checkbox instance
+            /*
             let checkbox = tempNode.querySelector("input[type='checkbox']");
             //Change value and id of checkbox to the according country
             checkbox.value = countries[i].code;
@@ -92,6 +100,7 @@ async function init() {
             checkbox.addEventListener('change', (event) => {
                 paintCountry(countries[i], event.currentTarget.checked);
             });
+            */
             //Append the TempNode to the documentFragment
             docFrag.appendChild(tempNode);
         }
@@ -110,7 +119,7 @@ async function init() {
         //Loop through each CountryPanel
         for (let country of countryPanels) {
             //Store current Country Panel Name
-            let name = (c.getElementsByClassName('country-text')[0].outerText).toLowerCase();
+            let name = (country.getElementsByClassName('country-text')[0].outerText).toLowerCase();
             //if the input is a substring of the country name, make div visible. If not, make div invisble
             country.style.display = name.includes(input) ? 'flex' : 'none';
         }
@@ -209,15 +218,24 @@ async function init() {
     };
 
     //Creating Sphere Object
-    let sphereGeo = new THREE.SphereGeometry(80, 64, 64);
+    let sphereGeo = new THREE.SphereGeometry(128, 64, 64);
     let sphereMat = new THREE.MeshBasicMaterial(sphereMaterial);
     let sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
     //Adding Sphere to Scene
     scene.add(sphereMesh);
+    //Get left Panel
+    leftPanel = document.getElementById('left-panel');
+    addEventListener('mousewheel', (event) => {
+        //Calculate offset according to ZoomLevel
+        let offset = ((camera.zoom - 1) * (camera.zoom - 1)) * 25;
+        //Change values of leftPanel according to zoomLevel
+        leftPanel.style.left = `calc(25% - ${offset}px)`;
+        leftPanel.style.visibility = camera.zoom > 3.7 ? 'hidden' : 'visible';
+        leftPanel.style.opacity = camera.zoom > 3.7 ? '0' : '1';
 
+    });
     //Call animation Function
     animate();
-
 }
 
 //Animate the Objects
