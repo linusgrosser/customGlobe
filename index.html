@@ -6,12 +6,13 @@
   <link rel="stylesheet" type="text/css" href="styles.css" />
 </head>
 
-<body>
+<body id="body">
   <div class="panel" id="left-panel">
-    <!-- <div class="hover-frame"></div> !-->
     <div class="country-panel">
       <div class="panel-icon">
-        <img id="white-flag" src="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/apple/76/waving-white-flag_1f3f3.png" alt="">
+        <img id="white-flag"
+          src="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/160/apple/76/waving-white-flag_1f3f3.png"
+          alt="">
       </div>
       <div class="content-holder">
         <h2>Countries</h2>
@@ -23,7 +24,29 @@
               <p class="country-text">South Africa</p>
             </div>
             <input type="checkbox" class="country-check" id="check-za" value="za" />
-            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="right-panel">
+    <div class="country-panel">
+      <div class="panel-icon">
+        <img id="gear-icon"
+          src="https://images.emojiterra.com/google/android-11/512px/2699.png"
+          alt="">
+      </div>
+      <div class="content-holder">
+        <h2>Settings</h2>
+        <input class="search-panel" type="text" id="country-search" placeholder="Search..." />
+        <div id="list-view">
+          <div class="country"  style="display: flex">
+            <div class="left-container">
+              <img class="flag" src="https://flagcdn.com/28x21/za.png">
+              <p class="country-text">Country Color</p>
+            </div>
+            <input type="color" class="country-check" value="red"/>
           </div>
         </div>
       </div>

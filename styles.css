@@ -29,6 +29,13 @@ body {
   transition: 200ms ease;
 }
 
+#right-panel {
+  left: 75%;
+  visibility: visible;
+  opacity: 1;
+  transition: 200ms ease;
+}
+
 .panel-icon {
   height: 50px;
   width: 50px;
@@ -54,6 +61,18 @@ body {
   margin: auto auto;
   height: 30px;
   width: 30px;
+}
+
+#gear-icon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  margin: auto auto;
+  height: 30px;
+  width: 30px;
+  filter: brightness(1.5);
 }
 
 

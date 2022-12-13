@@ -10,7 +10,11 @@ let scene, camera, renderer, controls, pointlight;
 //Array of all CountryObjects
 let countries = [];
 
-let leftPanel;
+let leftPanel, rightPanel;
+
+let mainColor = 'black';
+let bgColor = 'white';
+let selectedColor = 'green';
 
 //Function that fires at the start of app
 async function init() {
@@ -44,9 +48,12 @@ async function init() {
     controls.enableDamping = true;
 
     //Create Light, setting Position and adding to Scene (currently not necessary)
-    //pointlight = new THREE.PointLight(0xffffff, 1);
-    //pointlight.position.set(200, 200, 200);
-    //scene.add(pointlight);
+    pointlight = new THREE.PointLight(0xffffff, 1);
+    pointlight.position.set(200, 200, 200);
+    scene.add(pointlight);
+
+    const light = new THREE.AmbientLight( 0xffffff ); // soft white light
+    scene.add( light );
 
 
     //Get Json Country Data and fills the countries array with CountryObjects
@@ -63,7 +70,7 @@ async function init() {
             let name = data.features[i].properties.name;
             let code = (data.features[i].properties.iso_a2).toLowerCase();
             let geometry = data.features[i].geometry;
-            
+
 
             //Create Country Object
             let country = new Country(name, code, geometry);
@@ -91,16 +98,17 @@ async function init() {
             //Change Image source
             tempNode.querySelector("img").src = 'https://flagcdn.com/28x21/' + countries[i].code + '.png';
             //Get checkbox instance
-            /*
+
             let checkbox = tempNode.querySelector("input[type='checkbox']");
             //Change value and id of checkbox to the according country
             checkbox.value = countries[i].code;
             checkbox.id = 'check-' + countries[i].code;
             //Add an event Listener on the Checkbox. When Checkbox gets checked, paint the Country again
             checkbox.addEventListener('change', (event) => {
-                paintCountry(countries[i], event.currentTarget.checked);
+                let tempColor = event.target.checked ? selectedColor : mainColor;
+                paintCountry(countries[i], tempColor);
             });
-            */
+
             //Append the TempNode to the documentFragment
             docFrag.appendChild(tempNode);
         }
@@ -126,7 +134,7 @@ async function init() {
     });
 
     //Paint one Country
-    function paintCountry(country, selected = false) {
+    function paintCountry(country, color = 'white', init = false) {
         //Storing variables
         let isMulti = country.geometry.type === 'MultiPolygon';
         //Get coordinates
@@ -163,15 +171,16 @@ async function init() {
             }
             //Close Path, Fill with according color, and create Stroke
             ctx.closePath();
-            ctx.fillStyle = selected ? 'black' : 'silver';
+            ctx.fillStyle = color;
             ctx.fill();
             ctx.stroke();
 
             //If Country is selected, update Canvas
-            if (selected) {
+            if (!init) {
                 sphereMaterial.map = canvas;
                 texture.needsUpdate = true;
             }
+
 
         }
 
@@ -195,13 +204,13 @@ async function init() {
     canvas.height = canvasH;
     //Get Context of Canvas and set Background
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = "white";
+    ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvasW, canvasH);
     //Load All Countries
     await loadCountries();
     //Paint All Countries
     for (let i = 0; i < countries.length; i++) {
-        paintCountry(countries[i]);
+        paintCountry(countries[i], mainColor, true);
     }
     //Add All Countries to ListView
     addCountriesToListView();
@@ -211,27 +220,40 @@ async function init() {
     //Update Texture
     texture.needsUpdate = true;
 
+    const loader = new THREE.TextureLoader();
+    const displacement = loader.load('./textures/height.jpg');
+
     //Configurations for the Material
     const sphereMaterial = {
         map: texture,
+        displacementMap: displacement,
+        displacementScale: 1,
         //wireframe: true
     };
 
     //Creating Sphere Object
     let sphereGeo = new THREE.SphereGeometry(128, 64, 64);
-    let sphereMat = new THREE.MeshBasicMaterial(sphereMaterial);
+    let sphereMat = new THREE.MeshStandardMaterial(sphereMaterial);
     let sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
     //Adding Sphere to Scene
     scene.add(sphereMesh);
     //Get left Panel
     leftPanel = document.getElementById('left-panel');
+    rightPanel = document.getElementById('right-panel');
+
+    //document.getElementById('body').appendChild(canvas);
+
     addEventListener('mousewheel', (event) => {
         //Calculate offset according to ZoomLevel
         let offset = ((camera.zoom - 1) * (camera.zoom - 1)) * 25;
         //Change values of leftPanel according to zoomLevel
         leftPanel.style.left = `calc(25% - ${offset}px)`;
+        rightPanel.style.left = `calc(75% + ${offset}px)`;
+
         leftPanel.style.visibility = camera.zoom > 3.7 ? 'hidden' : 'visible';
+        rightPanel.style.visibility = camera.zoom > 3.7 ? 'hidden' : 'visible';
         leftPanel.style.opacity = camera.zoom > 3.7 ? '0' : '1';
+        rightPanel.style.opacity = camera.zoom > 3.7 ? '0' : '1';
 
     });
     //Call animation Function
