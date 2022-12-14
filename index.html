@@ -18,7 +18,7 @@
         <h2>Countries</h2>
         <input class="search-panel" type="text" id="country-search" placeholder="Search..." />
         <div id="list-view">
-          <div class="country" data-type="template" style="display: none">
+          <div class="list-item" data-type="template" style="display: none">
             <div class="left-container">
               <img class="flag" src="https://flagcdn.com/28x21/za.png">
               <p class="country-text">South Africa</p>
@@ -39,20 +39,27 @@
       </div>
       <div class="content-holder">
         <h2>Settings</h2>
-        <input class="search-panel" type="text" id="country-search" placeholder="Search..." />
         <div id="list-view">
-          <div class="country"  style="display: flex">
-            <div class="left-container">
-              <img class="flag" src="https://flagcdn.com/28x21/za.png">
-              <p class="country-text">Country Color</p>
-            </div>
-            <input type="color" class="country-check" value="red"/>
+          <div style="height: 20px;"></div>
+          <div class="list-item"  style="display: flex">
+            <p class="country-text">Country Color</p>
+            <input type="color" class="color-input" id="country-color-input" value="#878787"/>
+          </div>
+          <div class="list-item"  style="display: flex">
+            <p class="country-text">Selected Color</p>
+            <input type="color" class="color-input" id="selected-color-input" value="#38a838"/>
+          </div>
+          <div class="list-item"  style="display: flex">
+            <p class="country-text">Water Color</p>
+            <input type="color" class="color-input" id="water-color-input" value="#fcfcfc"/>
           </div>
         </div>
       </div>
     </div>
   </div>
-
+  <div class="bottom-note">
+    <p>ThreeJs Interactive Globe. Made w/ 💕 by <a href="https://github.com/linusgrosser">linusgrosser</a>.</p>
+  </div>
   <script type="module" src="script.js"></script>
 </body>
 
